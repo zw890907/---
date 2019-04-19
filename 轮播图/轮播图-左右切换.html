@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			li{
+				list-style: none;
+			}
+			#box{
+				width: 850px;
+				height: 500px;
+				margin: 100px auto;
+				position: relative;
+				overflow: hidden;
+			}
+			#box ul{
+				width: 5950px;
+				height: 500px;
+				position: absolute;
+				left: -850px;
+			}
+			#box ul li{
+				width: 850px;
+				height: 500px;
+				float: left;
+				z-index: 1;
+			}
+			#box ol{
+				height: 25px;
+				position: absolute;
+				right: 5%;
+				bottom: 20px;
+				z-index: 2;
+			}
+			#box ol li{
+				width: 25px;
+				height: 25px;
+				background: #FFFFFF;
+				border-radius: 50%;
+				float: left;
+				margin-left: 5px;
+				text-align: center;
+				line-height: 25px;
+				cursor: pointer;
+			}
+			#box ol .ac{
+				background: #FF9900;
+				color: #FF0000;
+			}
+			#box>a{
+				text-decoration: none;
+				width: 30px;
+				height: 30px;
+				background: rgba(0,0,0,.3);
+				position: absolute;
+				top: 50%;
+				margin-top: -15px;
+				text-align: center;
+				color: #FFC0CB;
+				font-size: 30px;
+				line-height: 25px;
+			}
+			#box .prev{
+				left: 5px;
+			}
+			#box .next{
+				right: 5px;
+			}
+		</style>
+		<script src="tools.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<div id="box">
+			<ul>
+				<!--为了实现无缝轮播时前后出现的空白，在最前和最后边插入相反的图代替空白-->
+				<li><a href="javascript:alert(4);"><img src="5.jpg"/></a></li>
+				<li><a href="javascript:alert(0);"><img src="1.jpg"/></a></li>
+				<li><a href="javascript:alert(1);"><img src="2.jpg"/></a></li>
+				<li><a href="javascript:alert(2);"><img src="3.jpg"/></a></li>
+				<li><a href="javascript:alert(3);"><img src="4.jpg"/></a></li>
+				<li><a href="javascript:alert(4);"><img src="5.jpg"/></a></li>
+				<li><a href="javascript:alert(0);"><img src="1.jpg"/></a></li>
+			</ul>
+			<ol>
+				<li class="ac">1</li>
+				<li>2</li>
+				<li>3</li>
+				<li>4</li>
+				<li>5</li>
+			</ol>
+			<a href="javascript:;" class="prev">&laquo;</a>
+			<a href="javascript:;" class="next">&raquo;</a>
+		</div>
+		<script type="text/javascript">
+			//面向对象，构造函数
+			function Slideshow (container) {
+				//找到所有需要的元素
+				this.container = document.querySelector(container);
+				this.ul = this.container.querySelector("ul");
+				this.imgs = this.ul.children;
+				this.btns = Array.from(this.container.querySelector("ol").children);
+				this.prev = this.container.querySelector(".prev");
+				this.next = this.container.querySelector(".next");
+				this.width = this.imgs[0].offsetWidth;
+				this.index = 0;
+				this.lastIndex = 0;
+				this.timer = null;
+				this.bindEvents();
+				this.autoPlay();
+			}
+			//绑定事件
+			Slideshow.prototype.bindEvents = function (){
+				//给btns绑定事件
+				this.btns.forEach((btn,i) =>{
+					btn.onclick = () =>{
+						this.index = i;
+						//调用方法
+						this.changeImg();
+					}
+				})
+				//给前后按钮绑事件
+				this.next.onclick = () =>{
+					this.index++;
+					if(this.index === this.btns.length){
+						this.index = 0;
+						this.ul.style.left = 0;
+					}
+					this.changeImg();
+				}
+				this.prev.onclick = () =>{
+					this.index--;
+					if(this.index < 0){
+						this.index = this.btns.length - 1;
+						this.ul.style.left = -(this.btns.length + 1)*this.width + "px";
+					}
+					this.changeImg();
+				}
+				//鼠标移入事件
+				this.container.onmouseenter = () =>{
+					clearInterval(this.timer);
+				}
+				//鼠标移出事件
+				this.container.onmouseleave = this.autoPlay.bind(this);
+			}
+			//自动切换方法
+			Slideshow.prototype.autoPlay = function (){
+				this.timer = setInterval(() =>{
+					this.next.onclick();
+				},2000)
+			}
+			//按钮事件方法
+			Slideshow.prototype.changeImg = function () {
+				this.btns[this.lastIndex].classList.remove("ac");
+				this.btns[this.index].classList.add("ac");
+				this.lastIndex = this.index;
+				tools.linearMove(this.ul,"left",-(this.index + 1)*this.width,1000)
+			}
+			new Slideshow("#box");
+		</script>
+	</body>
+</html>
